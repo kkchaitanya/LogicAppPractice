@@ -1,0 +1,98 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "When_an_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "GET"
+                },
+                "description": "HTTP Testing"
+            }
+        },
+        "actions": {
+            "Response": {
+                "runAfter": {
+                    "Filter_array": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@body('Filter_array')"
+                }
+            },
+            "Initialize_variables": {
+                "runAfter": {},
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "Object",
+                            "type": "object",
+                            "value": {
+                                "status": "success",
+                                "data": [
+                                    {
+                                        "id": 1,
+                                        "name": "John Doe",
+                                        "email": "john.doe@example.com",
+                                        "age": 28
+                                    },
+                                    {
+                                        "id": 2,
+                                        "name": "Jane Smith",
+                                        "email": "jane.smith@example.com",
+                                        "age": 34
+                                    },
+                                    {
+                                        "id": 3,
+                                        "name": "Alice Johnson",
+                                        "email": "alice.johnson@example.com",
+                                        "age": 22
+                                    },
+                                    {
+                                        "id": 4,
+                                        "name": "Bob Brown",
+                                        "email": "bob.brown@example.com",
+                                        "age": 45
+                                    }
+                                ],
+                                "message": "Fetched users successfully"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Filter_array": {
+                "runAfter": {
+                    "Initialize_variables": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Query",
+                "inputs": {
+                    "from": "@variables('Object')['data']",
+                    "where": "@greater(item()?['age'], int(triggerOutputs()['queries']['age']))"
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "type": "Object",
+            "value": {}
+        }
+    }
+}
